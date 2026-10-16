@@ -45,11 +45,14 @@ int main(void) {
  CHECK(ListView_GetTextColor(list)==RGB(232,234,238));
  SendMessageW(button,BM_CLICK,0,0);CHECK(SendMessageW(button,BM_GETCHECK,0,0)==BST_CHECKED);
  SendMessageW(button,BM_CLICK,0,0);CHECK(SendMessageW(button,BM_GETCHECK,0,0)==BST_UNCHECKED);
- HWND second=CreateWindowW(wc.lpszClassName,L"Late settings window",WS_OVERLAPPEDWINDOW|WS_VISIBLE,100,100,400,300,w,NULL,wc.hInstance,NULL);pump();
+ HWND second=CreateWindowW(wc.lpszClassName,L"Late settings window",WS_OVERLAPPEDWINDOW|WS_VISIBLE,100,100,400,300,w,NULL,wc.hInstance,NULL);
+ printf("Second HWND=%p error=%lu\n",(void*)second,GetLastError());CHECK(second!=NULL);pump();
+ printf("window procedures: main=%p second=%p default=%p\n",(void*)GetWindowLongPtrW(w,GWLP_WNDPROC),(void*)GetWindowLongPtrW(second,GWLP_WNDPROC),(void*)DefWindowProcW);
  /* Render into a bitmap: hosted runners may clip windows at screen edges. */
  dc=GetDC(second);HDC memory=CreateCompatibleDC(dc);
  HBITMAP bitmap=CreateCompatibleBitmap(dc,16,16);HGDIOBJ previous=SelectObject(memory,bitmap);
  SendMessageW(second,WM_ERASEBKGND,(WPARAM)memory,0);
+ printf("Late paint pixel=%lu dc=%p bitmap=%p\n",GetPixel(memory,5,5),(void*)memory,(void*)bitmap);
  CHECK(GetPixel(memory,5,5)==RGB(30,32,36));
  SelectObject(memory,previous);DeleteObject(bitmap);DeleteDC(memory);ReleaseDC(second,dc);
  FreeLibrary(dll);pump();CHECK(GetModuleHandleW(L"DarkMode.dll")!=NULL);
