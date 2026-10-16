@@ -4,6 +4,9 @@
 #include <commctrl.h>
 #include <stdio.h>
 #include <wchar.h>
+#ifdef _MSC_VER
+#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
 static void pump(void) {
  DWORD end=GetTickCount()+1200; MSG m;
  while((LONG)(end-GetTickCount())>0) {
@@ -15,7 +18,7 @@ static int failures;
 #define CHECK(c) do {printf("%s: %s\n",(c)?"PASS":"FAIL",#c);if(!(c))failures++;} while(0)
 int main(void) {
  INITCOMMONCONTROLSEX cc={sizeof(cc),ICC_LISTVIEW_CLASSES};InitCommonControlsEx(&cc);
- HMODULE dll=LoadLibraryW(L"DarkMode.dll"); CHECK(dll!=NULL);if(!dll)return 2;
+ HMODULE dll=LoadLibraryW(L"DarkMode.dll"); CHECK(dll!=NULL);if(!dll){printf("LoadLibrary error: %lu\n",GetLastError());return 2;}
  wchar_t text[]=L"Japanese \x65e5\x672c\x8a9e\r\n";
  wchar_t *(*pass)(wchar_t*,const void*)=(wchar_t *(*)(wchar_t*,const void*))GetProcAddress(dll,"OnNewSentence");
  CHECK(pass && pass(text,NULL)==text);CHECK(wcscmp(text,L"Japanese \x65e5\x672c\x8a9e\r\n")==0);
