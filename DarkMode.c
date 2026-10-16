@@ -8,7 +8,7 @@
 
 /* LunaHost UI-only plugin. No game hooks and no text transformations. */
 static HMODULE module;
-static HHOOK hook;
+static HHOOK hook, queuedHook;
 static DWORD uiThread;
 static BOOL busy, dark = TRUE;
 static HBRUSH background, field;
@@ -180,13 +180,26 @@ static LRESULT CALLBACK themed(HWND w, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR 
 static LRESULT CALLBACK onMessage(int code, WPARAM wp, LPARAM lp) {
     if(code>=0 && !busy) {
         const CWPSTRUCT *m=(const CWPSTRUCT*)lp;
-        if((m->message==WM_SHOWWINDOW || m->message==WM_NULL || m->message==WM_PAINT || m->message==WM_PARENTNOTIFY) && belongs(m->hwnd)) {
+        if((m->message==WM_SHOWWINDOW || m->message==WM_NULL || m->message==WM_PAINT || m->message==WM_ERASEBKGND || m->message==WM_WINDOWPOSCHANGED || m->message==WM_PARENTNOTIFY) && belongs(m->hwnd)) {
             busy=TRUE; install(m->hwnd);
             if(m->message!=WM_PAINT && isClass(m->hwnd,L"LunaHostWindow"))EnumChildWindows(m->hwnd,child,0);
             busy=FALSE;
         }
     }
     return CallNextHookEx(hook,code,wp,lp);
+}
+/* Windows does not deliver posted WM_PAINT through WH_CALLWNDPROC.
+   Attach on the owning UI thread before queued messages are dispatched too. */
+static LRESULT CALLBACK onQueued(int code, WPARAM wp, LPARAM lp) {
+    if(code>=0 && wp==PM_REMOVE && !busy) {
+        const MSG *m=(const MSG*)lp;
+        if(m->hwnd && belongs(m->hwnd)) {
+            busy=TRUE;install(m->hwnd);
+            if(isClass(m->hwnd,L"LunaHostWindow"))EnumChildWindows(m->hwnd,child,0);
+            busy=FALSE;
+        }
+    }
+    return CallNextHookEx(queuedHook,code,wp,lp);
 }
 static BOOL CALLBACK findHost(HWND w, LPARAM out) {
     DWORD pid; DWORD tid=GetWindowThreadProcessId(w,&pid);
@@ -207,6 +220,7 @@ static DWORD WINAPI initialize(void *unused) {
     dark=!highContrast();background=CreateSolidBrush(BG);field=CreateSolidBrush(FIELD);
     if(!background || !field)return 0;
     hook=SetWindowsHookExW(WH_CALLWNDPROC,onMessage,module,uiThread);
+    queuedHook=SetWindowsHookExW(WH_GETMESSAGE,onQueued,module,uiThread);
     if(hook) {DWORD_PTR result;SendMessageTimeoutW(host,WM_NULL,0,0,SMTO_ABORTIFHUNG,2000,&result);}
     return 0;
 }
