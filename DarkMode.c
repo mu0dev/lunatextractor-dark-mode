@@ -219,9 +219,17 @@ static DWORD WINAPI initialize(void *unused) {
     if(!host)return 0;
     dark=!highContrast();background=CreateSolidBrush(BG);field=CreateSolidBrush(FIELD);
     if(!background || !field)return 0;
+    HANDLE lifetime=OpenThread(SYNCHRONIZE,FALSE,uiThread);
+    if(!lifetime)return 0;
     hook=SetWindowsHookExW(WH_CALLWNDPROC,onMessage,module,uiThread);
     queuedHook=SetWindowsHookExW(WH_GETMESSAGE,onQueued,module,uiThread);
     if(hook) {DWORD_PTR result;SendMessageTimeoutW(host,WM_NULL,0,0,SMTO_ABORTIFHUNG,2000,&result);}
+    /* Windows removes hooks when the installing thread exits. Keep their
+       owner alive until the UI thread finishes (Wine did not expose this). */
+    if(hook || queuedHook)WaitForSingleObject(lifetime,INFINITE);
+    if(hook)UnhookWindowsHookEx(hook);
+    if(queuedHook)UnhookWindowsHookEx(queuedHook);
+    CloseHandle(lifetime);
     return 0;
 }
 __declspec(dllexport) wchar_t *OnNewSentence(wchar_t *sentence, const void *info) {
