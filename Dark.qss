@@ -1,0 +1,43 @@
+/* Qt 5 plugin windows; the native host is themed by DarkMode.dll. */
+QWidget {
+    background-color: #1e2024;
+    color: #e8eaee;
+    selection-background-color: #355f8d;
+    selection-color: #ffffff;
+}
+QLineEdit, QTextEdit, QPlainTextEdit, QAbstractItemView, QSpinBox, QDoubleSpinBox, QComboBox {
+    background-color: #17191d;
+    color: #e8eaee;
+    border: 1px solid #555c67;
+    border-radius: 3px;
+}
+QLineEdit, QSpinBox, QDoubleSpinBox { padding: 3px; }
+QAbstractItemView { alternate-background-color: #252931; }
+QPushButton, QToolButton {
+    background-color: #2d3138;
+    border: 1px solid #555c67;
+    border-radius: 3px;
+    padding: 5px 10px;
+}
+QPushButton:hover, QToolButton:hover { background-color: #3a424e; border-color: #89beff; }
+QPushButton:pressed, QToolButton:pressed, QToolButton:checked { background-color: #355f8d; }
+QPushButton:default, QPushButton:focus, QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
+    border: 1px solid #89beff;
+}
+QWidget:disabled { color: #9ba0aa; }
+QPushButton:disabled, QToolButton:disabled { background-color: #25282e; border-color: #454a52; }
+QCheckBox, QRadioButton { spacing: 6px; }
+QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #9ba0aa; background: #17191d; }
+QCheckBox::indicator:checked { image: url(themes/check.png); background: #355f8d; border-color: #89beff; }
+QCheckBox::indicator:indeterminate { background: #89beff; }
+QCheckBox::indicator:disabled { border-color: #666b75; }
+QGroupBox { border: 1px solid #555c67; border-radius: 3px; margin-top: 10px; padding-top: 8px; }
+QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 4px; }
+QMenu, QMenuBar { background: #252931; color: #e8eaee; }
+QMenu::item:selected, QMenuBar::item:selected { background: #355f8d; }
+QMenu::separator { height: 1px; background: #555c67; margin: 4px; }
+QHeaderView::section { background: #2d3138; color: #e8eaee; border: 1px solid #555c67; padding: 4px; }
+QTabWidget::pane { border: 1px solid #555c67; }
+QTabBar::tab { background: #2d3138; padding: 6px 12px; border: 1px solid #555c67; }
+QTabBar::tab:selected { background: #355f8d; }
+QToolTip { background: #303640; color: #ffffff; border: 1px solid #89beff; padding: 4px; }

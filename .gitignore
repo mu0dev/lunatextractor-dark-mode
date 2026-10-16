@@ -1,0 +1,6 @@
+*.pdb
+*.obj
+*.lib
+*.exp
+smoke-test.exe
+*results.txt
